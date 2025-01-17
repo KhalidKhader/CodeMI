@@ -2,8 +2,5 @@ matplotlib
 seaborn
 scikit-learn
 radon
-os
-numpy
-pandas
-streamlit
+
 
