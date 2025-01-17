@@ -132,11 +132,11 @@ if uploaded_files:
         normalized_df = pd.DataFrame(scaler.fit_transform(normalized_df), columns=normalized_df.columns)
 
     # Maintainability Index Calculation
-    alpha, beta, gamma = 4/7, 3/7, 1/7
+    alpha, beta, gamma = 4/7, 3/7, 2/7
     normalized_df["Maintainability Index"] = (
         alpha * np.log(1 + normalized_df["Avg Cyclomatic Complexity"]) +
         beta * np.log(1 + normalized_df["Comments"]) +
-        beta * (1 - np.exp(-normalized_df["LOC (Lines of Code)"])) +
+        beta * (np.log(normalized_df["LOC (Lines of Code)"])) +
         gamma / (1 + normalized_df["Magic Numbers"])
     )
     df["Maintainability Index"] = normalized_df["Maintainability Index"]
