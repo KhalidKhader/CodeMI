@@ -31,7 +31,8 @@ This interactive dashboard provides a **comprehensive analysis of code quality**
 dict = {
     'std.code.complexity:cyclomatic': 'Avg Cyclomatic Complexity',
     'std.code.lines:comments': 'Comments',
-    'std.code.lines:code': 'LOC (Lines of Code)',
+    # 'std.code.lines:code': 'LOC (Lines of Code)',
+    'std.code.length:total': 'LOC (Lines of Code)',
     'std.code.magic:numbers': 'Magic Numbers'
 }
 
@@ -136,7 +137,7 @@ if uploaded_files:
     normalized_df["Maintainability Index"] = (
         alpha * np.log(1 + normalized_df["Avg Cyclomatic Complexity"]) +
         beta * np.log(1 + normalized_df["Comments"]) +
-        beta * np.log(1+ normalized_df["LOC (Lines of Code)"]) +
+        beta * (1 - np.exp(-normalized_df["LOC (Lines of Code)"])) +
         gamma / (1 + normalized_df["Magic Numbers"])
     )
     df["Maintainability Index"] = normalized_df["Maintainability Index"]
