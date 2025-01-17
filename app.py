@@ -120,6 +120,7 @@ if uploaded_files:
 
     # Create DataFrame
     df = pd.DataFrame(data)
+    df = df.fillna(0)
 
     # Normalize Data for Maintainability Index Calculation
     scaler = MinMaxScaler()
@@ -155,7 +156,7 @@ if uploaded_files:
     st.dataframe(df.describe())
 
     st.write("#### Key Insights")
-    if df["Maintainability Index"].min() < 65:
+    if df["Maintainability Index"].min() < 0.65:
         st.warning("⚠️ Some files have a low Maintainability Index (below 65). Consider refactoring.")
     else:
         st.success("✅ All files have a good Maintainability Index.")
