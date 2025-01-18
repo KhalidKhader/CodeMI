@@ -119,7 +119,7 @@ if uploaded_files:
 
             data.extend(df.to_dict(orient="records"))
 
-    # Create DataFrame
+      # Create DataFrame
     df = pd.DataFrame(data)
     df = df.fillna(0)
 
@@ -131,16 +131,21 @@ if uploaded_files:
         df = df.rename(columns=dict)
         normalized_df = df.drop(columns=["file", "region", "type", "modified"])
         normalized_df = pd.DataFrame(scaler.fit_transform(normalized_df), columns=normalized_df.columns)
+        
 
-    # Maintainability Index Calculation
-    alpha, beta, gamma = 4/7, 3/7, 2/7
-    normalized_df["Maintainability Index"] = (
-        alpha * np.log(1 + normalized_df["Avg Cyclomatic Complexity"]) +
-        beta * np.log(1 + normalized_df["Comments"]) +
-        beta * (1 - np.exp(-normalized_df["LOC (Lines of Code)"])) +
-        gamma / (1 + normalized_df["Magic Numbers"])
+    alpha, beta, gamma, delta = 4/7, 3/7, 2/7, 1/7
+    # Calculate Maintainability Index (MI)
+    normalized_df["MI"] = (
+        alpha * (1 - np.log1p(normalized_df["Avg Cyclomatic Complexity"])) +
+        beta * normalized_df["Comments"] +
+        gamma * (1 - normalized_df["LOC (Lines of Code)"]) +
+        delta * (1 - normalized_df["Magic Numbers"])
     )
-    df["Maintainability Index"] = normalized_df["Maintainability Index"]
+    
+    # Ensure MI is between 0 and 1
+    normalized_df["MI"] = normalized_df["MI"].clip(0, 1)
+    # Ensure the index is between 0 and 1
+    df["Maintainability Index"] = normalized_df["MI"].clip(0, 1)
 
     # Display DataFrame
     st.write("### 📝 Code Analysis Results")
@@ -157,12 +162,12 @@ if uploaded_files:
     st.dataframe(df.describe())
 
     st.write("#### Key Insights")
-    if df["Maintainability Index"].min() < 65:
+    if df["Maintainability Index"].min() < 0.65:
         st.warning("⚠️ Some files have a low Maintainability Index (below 65). Consider refactoring.")
     else:
         st.success("✅ All files have a good Maintainability Index.")
 
-    if df["Maintainability Index"].mean() > 0.7:
+    if df["Maintainability Index"].mean() > 0.65:
         st.success("🎉 The average Maintainability Index indicates excellent maintainability!")
     else:
         st.warning("🔍 The average Maintainability Index suggests room for improvement in maintainability.")
