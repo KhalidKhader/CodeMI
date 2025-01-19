@@ -46,20 +46,47 @@ uploaded_files = st.file_uploader(
 
 
 
-# Helper Function: Calculate Magic Numbers Manually
+# # Helper Function: Calculate Magic Numbers Manually
+# def calculate_magic_numbers(code):
+#     """
+#     Parses Python code to find magic numbers (numeric literals).
+#     Returns the count of all numeric literals found in the code.
+#     """
+#     try:
+#         tree = ast.parse(code)
+#         magic_numbers = [
+#             node.n
+#             for node in ast.walk(tree)
+#             if isinstance(node, ast.Constant) and isinstance(node.n, (int, float))
+#         ]
+#         return len(magic_numbers)
+#     except Exception as e:
+#         st.error(f"Error calculating magic numbers: {e}")
+#         return 0
+
 def calculate_magic_numbers(code):
     """
     Parses Python code to find magic numbers (numeric literals).
     Returns the count of all numeric literals found in the code.
     """
     try:
-        tree = ast.parse(code)
-        magic_numbers = [
-            node.n
-            for node in ast.walk(tree)
-            if isinstance(node, ast.Constant) and isinstance(node.n, (int, float))
-        ]
+        tree = ast.parse(code)  # Parse the Python code into an AST
+        magic_numbers = []
+
+        for node in ast.walk(tree):
+            # Check for constant values (Python 3.8+ uses ast.Constant)
+            if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
+                # Exclude common values like -1, 0, 1
+                if node.value not in {-1, 0, 1}:
+                    magic_numbers.append(node.value)
+
+            # For Python < 3.8, check ast.Num
+            elif hasattr(ast, "Num") and isinstance(node, ast.Num):
+                if node.n not in {-1, 0, 1}:
+                    magic_numbers.append(node.n)
+
         return len(magic_numbers)
+
     except Exception as e:
         st.error(f"Error calculating magic numbers: {e}")
         return 0
