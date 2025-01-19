@@ -44,54 +44,23 @@ uploaded_files = st.file_uploader(
     type=["py", "csv", "xlsx"]
 )
 
-
-
-# # Helper Function: Calculate Magic Numbers Manually
-# def calculate_magic_numbers(code):
-#     """
-#     Parses Python code to find magic numbers (numeric literals).
-#     Returns the count of all numeric literals found in the code.
-#     """
-#     try:
-#         tree = ast.parse(code)
-#         magic_numbers = [
-#             node.n
-#             for node in ast.walk(tree)
-#             if isinstance(node, ast.Constant) and isinstance(node.n, (int, float))
-#         ]
-#         return len(magic_numbers)
-#     except Exception as e:
-#         st.error(f"Error calculating magic numbers: {e}")
-#         return 0
-
+# Helper Function: Calculate Magic Numbers Manually
 def calculate_magic_numbers(code):
     """
     Parses Python code to find magic numbers (numeric literals).
     Returns the count of all numeric literals found in the code.
     """
     try:
-        tree = ast.parse(code)  # Parse the Python code into an AST
-        magic_numbers = []
-
-        for node in ast.walk(tree):
-            # Check for constant values (Python 3.8+ uses ast.Constant)
-            if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
-                # Exclude common values like -1, 0, 1
-                if node.value not in {-1, 0, 1}:
-                    magic_numbers.append(node.value)
-
-            # For Python < 3.8, check ast.Num
-            elif hasattr(ast, "Num") and isinstance(node, ast.Num):
-                if node.n not in {-1, 0, 1}:
-                    magic_numbers.append(node.n)
-
+        tree = ast.parse(code)
+        magic_numbers = [
+            node.n
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Constant) and isinstance(node.n, (int, float))
+        ]
         return len(magic_numbers)
-
     except Exception as e:
         st.error(f"Error calculating magic numbers: {e}")
         return 0
-
-
 
 # Helper Function: Calculate Cohesion (Experimental)
 def calculate_cohesion(file_path):
@@ -130,9 +99,6 @@ if uploaded_files:
             comments = raw_metrics.comments
             blank_lines = raw_metrics.blank
 
-            # Maintainability Index
-            mi = mi_visit(code, multi=False)
-
             # Magic Numbers
             magic_numbers = calculate_magic_numbers(code)
 
@@ -141,6 +107,8 @@ if uploaded_files:
 
             # Clean up temporary file
             os.remove(temp_file_path)
+            alpha, beta, gamma, delta = 4/7, 3/7, 2/7, 1/7
+            mi =  alpha * (1 - np.log1p(avg_cc)) + beta * comments + gamma * (1 - loc) + delta * (1 - magic_numbers)
 
             # Append results
             data.append({
@@ -149,7 +117,7 @@ if uploaded_files:
                 "LOC (Lines of Code)": loc,
                 "Comments": comments,
                 "Blank Lines": blank_lines,
-                "Maintainability Index": mi,
+                "Maintainability Index": mi.clip(0,1),
                 "Magic Numbers": magic_numbers,
                 "Cohesion (Experimental)": cohesion
             })
@@ -165,16 +133,17 @@ if uploaded_files:
 
       # Create DataFrame
     df = pd.DataFrame(data)
-    df = df.fillna(90)
+    df = df.fillna(0)
 
     # Normalize Data for Maintainability Index Calculation
     scaler = MinMaxScaler()
     if file_name.endswith(".py"):
-        normalized_df = df.drop(columns=["Cohesion (Experimental)"])
+        normalized_df = df.drop(columns=["Cohesion (Experimental)", "file"])
     else:
         df = df.rename(columns=dict)
         normalized_df = df.drop(columns=["file", "region", "type", "modified"])
-        normalized_df = pd.DataFrame(scaler.fit_transform(normalized_df), columns=normalized_df.columns)
+        
+    normalized_df = pd.DataFrame(scaler.fit_transform(normalized_df), columns=normalized_df.columns)
         
 
     alpha, beta, gamma, delta = 4/7, 3/7, 2/7, 1/7
@@ -189,7 +158,7 @@ if uploaded_files:
     # Ensure MI is between 0 and 1
     normalized_df["MI"] = normalized_df["MI"].clip(0, 1)
     # Ensure the index is between 0 and 1
-    df["Maintainability Index"] = normalized_df["MI"].clip(0, 1)
+    df["Maintainability Index"] = normalized_df["MI"]#.clip(0, 1)
 
     # Display DataFrame
     st.write("### 📝 Code Analysis Results")
