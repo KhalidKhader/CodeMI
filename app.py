@@ -164,6 +164,7 @@ if uploaded_files:
     # Ensure the index is between 0 and 1
     df["Maintainability Index"] = normalized_df["MI"]
     # df["Maintainability Index"] = normalized_df["MI"].clip(0, 1)
+    df["Maintainability Index"]=100
 
     # Display DataFrame
     st.write("### 📝 Code Analysis Results")
