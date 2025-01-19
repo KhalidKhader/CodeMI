@@ -138,7 +138,7 @@ if uploaded_files:
 
       # Create DataFrame
     df = pd.DataFrame(data)
-    df = df.fillna(0)
+    df = df.fillna(90)
 
     # Normalize Data for Maintainability Index Calculation
     scaler = MinMaxScaler()
@@ -162,9 +162,7 @@ if uploaded_files:
     # Ensure MI is between 0 and 1
     normalized_df["MI"] = normalized_df["MI"].clip(0, 1)
     # Ensure the index is between 0 and 1
-    df["Maintainability Index"] = normalized_df["MI"]
-    # df["Maintainability Index"] = normalized_df["MI"].clip(0, 1)
-    df["Maintainability Index"]=100
+    df["Maintainability Index"] = normalized_df["MI"].clip(0, 1)
 
     # Display DataFrame
     st.write("### 📝 Code Analysis Results")
