@@ -45,9 +45,16 @@ uploaded_files = st.file_uploader(
 
 # Helper Function: Calculate Magic Numbers
 def calculate_magic_numbers(code):
-    visitor = ComplexityVisitor.from_code(code)
-    magic_numbers = sum(len(node.magic_numbers) for node in visitor.functions)
-    return magic_numbers
+    try:
+        visitor = ComplexityVisitor.from_code(code)
+        magic_numbers = sum(
+            len(getattr(node, "magic_numbers", [])) for node in visitor.functions
+        )
+        return magic_numbers
+    except AttributeError:
+        # Fallback in case 'magic_numbers' is not an attribute
+        return 0
+
 
 # Helper Function: Calculate Cohesion (Experimental)
 def calculate_cohesion(file_path):
