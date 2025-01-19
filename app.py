@@ -9,6 +9,7 @@ from radon.complexity import cc_visit
 from radon.metrics import mi_visit
 from radon.raw import analyze
 from radon.visitors import ComplexityVisitor
+import ast
 
 # Streamlit App Title and Description
 st.set_page_config(page_title="Code Metrics Dashboard", layout="wide")
@@ -43,17 +44,26 @@ uploaded_files = st.file_uploader(
     type=["py", "csv", "xlsx"]
 )
 
-# Helper Function: Calculate Magic Numbers
+
+
+# Helper Function: Calculate Magic Numbers Manually
 def calculate_magic_numbers(code):
+    """
+    Parses Python code to find magic numbers (numeric literals).
+    Returns the count of all numeric literals found in the code.
+    """
     try:
-        visitor = ComplexityVisitor.from_code(code)
-        magic_numbers = sum(
-            len(getattr(node, "magic_numbers", [])) for node in visitor.functions
-        )
-        return magic_numbers
-    except AttributeError:
-        # Fallback in case 'magic_numbers' is not an attribute
+        tree = ast.parse(code)
+        magic_numbers = [
+            node.n
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Constant) and isinstance(node.n, (int, float))
+        ]
+        return len(magic_numbers)
+    except Exception as e:
+        st.error(f"Error calculating magic numbers: {e}")
         return 0
+
 
 
 # Helper Function: Calculate Cohesion (Experimental)
