@@ -138,7 +138,7 @@ if uploaded_files:
 
       # Create DataFrame
     df = pd.DataFrame(data)
-    # df = df.fillna(0)
+    df = df.fillna(0)
 
     # Normalize Data for Maintainability Index Calculation
     scaler = MinMaxScaler()
@@ -156,7 +156,7 @@ if uploaded_files:
         alpha * (1 - np.log1p(normalized_df["Avg Cyclomatic Complexity"])) +
         beta * normalized_df["Comments"] +
         gamma * (1 - normalized_df["LOC (Lines of Code)"]) +
-        delta * (1 - normalized_df["Magic Numbers"])
+        delta * (1 - normalized_df["Magic Numbers"])+1
     )
     
     # Ensure MI is between 0 and 1
