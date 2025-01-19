@@ -156,13 +156,14 @@ if uploaded_files:
         alpha * (1 - np.log1p(normalized_df["Avg Cyclomatic Complexity"])) +
         beta * normalized_df["Comments"] +
         gamma * (1 - normalized_df["LOC (Lines of Code)"]) +
-        delta * (1 - normalized_df["Magic Numbers"])+1
+        delta * (1 - normalized_df["Magic Numbers"])
     )
     
     # Ensure MI is between 0 and 1
     normalized_df["MI"] = normalized_df["MI"].clip(0, 1)
     # Ensure the index is between 0 and 1
-    df["Maintainability Index"] = normalized_df["MI"].clip(0, 1)
+    df["Maintainability Index"] = normalized_df["MI"]
+    # df["Maintainability Index"] = normalized_df["MI"].clip(0, 1)
 
     # Display DataFrame
     st.write("### 📝 Code Analysis Results")
