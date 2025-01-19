@@ -138,7 +138,7 @@ if uploaded_files:
 
       # Create DataFrame
     df = pd.DataFrame(data)
-    df = df.fillna(0)
+    # df = df.fillna(0)
 
     # Normalize Data for Maintainability Index Calculation
     scaler = MinMaxScaler()
